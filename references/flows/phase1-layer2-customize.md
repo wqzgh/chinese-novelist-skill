@@ -163,7 +163,7 @@ Options:
 📊 **规模**：[章节数]章 | ⚠ **特殊要求**：[特殊要求]
 ```
 
-**使用 AskUserQuestion 请求最终确认**：
+**使用当前环境的提问方式请求最终确认**（见 [shared-infrastructure.md](shared-infrastructure.md)「交互运行时适配」）。若走「直接开写协议」，展示摘要后不要等待，直接进入第三层选标题：
 
 ```
 Question: 以上是你的完整创作配置，确认无误吗？

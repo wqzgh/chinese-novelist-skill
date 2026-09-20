@@ -1,6 +1,8 @@
 # 第四阶段：自动校验与修复
 
-**目标**：确保所有章节完成且字数达标，全程无需用户介入。
+**目标**：确保所有章节完成且字数达标。
+
+`serial-review`：用户尚未把全部章节从 `awaiting_review` 改为 `completed` 之前，不要进入本阶段，更不要擅自重写已提交审核的章节。
 
 ---
 
@@ -15,9 +17,9 @@
 对每一章执行以下检查：
 
 1. **文件存在性**：检查 `filePath` 指定的文件是否存在
-2. **字数检查**：使用脚本检查字数
+2. **字数检查**：使用 skill 根目录脚本检查（见 [shared-infrastructure.md](shared-infrastructure.md)「字数检查脚本」）
    ```bash
-   python scripts/check_chapter_wordcount.py <章节文件路径>
+   python3 "$SKILL_ROOT/scripts/check_chapter_wordcount.py" <章节文件路径>
    ```
 3. **更新 JSON**：将 `wordCount` 和 `wordCountPass` 写入对应章节记录
 

@@ -1,0 +1,7 @@
+# Generated novels and per-user memory (do not ship in the skill repo)
+chinese-novelist/
+user-preferences.json
+
+.DS_Store
+*.pyc
+__pycache__/
