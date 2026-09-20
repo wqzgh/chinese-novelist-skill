@@ -30,7 +30,7 @@
 
 安装skill：`npx skills add PenglongHuang/chinese-novelist-skill`
 
-Cursor：`ln -sfn /path/to/chinese-novelist-skill ~/.cursor/skills/chinese-novelist`
+Cursor 本机全局：clone 后运行 `./scripts/install-global.sh`
 
 输入指令：`使用 chinese-novelist 帮我写一部小说`
 
@@ -203,26 +203,33 @@ chinese-novelist/
 
 ## 🛠️ 安装
 
-### Cursor
+### Cursor 本机全局安装（推荐）
 
-将本仓库复制或软链到 Cursor 的 skills 目录后重启 Agent：
+把 Skill 装到 `~/.cursor/skills/chinese-novelist/`，之后**任意新项目**的 Agent 都能用。在本机终端执行：
 
 ```bash
-# 用户级（推荐）
-ln -sfn /path/to/chinese-novelist-skill ~/.cursor/skills/chinese-novelist
+git clone https://github.com/wqzgh/chinese-novelist-skill.git
+cd chinese-novelist-skill
+./scripts/install-global.sh
 ```
 
-不要把仓库根目录软链进 `.cursor/skills/`，会形成目录循环。
+Windows（PowerShell）：
+
+```powershell
+git clone https://github.com/wqzgh/chinese-novelist-skill.git
+cd chinese-novelist-skill
+.\scripts\install-global.ps1
+```
+
+装好后新开一个 Agent 对话，输入 `/chinese-novelist` 或「用 chinese-novelist 帮我写一部小说」。章节会写到**你当时打开的那个项目**下的 `chinese-novelist/`，不是这个仓库里。
+
+不要把仓库根目录软链进项目的 `.cursor/skills/`，会形成目录循环。
 
 ### Claude Code
 
 安装 skill：`npx skills add PenglongHuang/chinese-novelist-skill`
 
-或将此目录放入 Claude Code 的 skills 目录：
-
-```
-~/.claude/skills/chinese-novelist/
-```
+或运行上面的 `install-global.sh`（会同时写入 `~/.claude/skills/chinese-novelist/`）。
 
 输入指令：`使用 chinese-novelist 帮我写一部小说`
 
