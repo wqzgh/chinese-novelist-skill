@@ -30,6 +30,8 @@
 
 安装skill：`npx skills add PenglongHuang/chinese-novelist-skill`
 
+Cursor：`ln -sfn /path/to/chinese-novelist-skill ~/.cursor/skills/chinese-novelist`
+
 输入指令：`使用 chinese-novelist 帮我写一部小说`
 
 ## 🖼️ 使用过程
@@ -76,11 +78,11 @@
                                                             ↓
                                             ┌───────────────────────────┐
                                             │ Phase 2.5 写作模式选择     │
-                                            │ 串行 / 子Agent并行 / Teams │
+                                            │ 逐章审核 / 串行 / 并行 / Teams │
                                             └─────────┬─────────────────┘
                                                       ↓
        ┌──────────────────────────────────────────────────────────────┐
-       │ Phase 3 疯狂创作（全自动，无需确认）                         │
+       │ Phase 3 创作（默认逐章审核，通过后再写下章）                 │
        │ 逐章：写前分析 → 撰写(3000-5000字) → 润色去AI味 → 字数检查  │
        └──────────────────────────────────────────────────────────────┘
                             ↓
@@ -149,21 +151,21 @@ AI 自动生成大纲（7列章节规划）、人物档案、写作计划 JSON�
 
 | 模式 | 说明 | 适用场景 |
 |------|------|----------|
-| **串行** | 主 Agent 逐章写，稳定可靠 | 默认推荐 |
-| **子Agent并行** | 多个子 Agent 分批并行写 | 追求速度 |
-| **Agent Teams** | Claude Code 多 Agent 协作 | 大型长篇 |
+| **逐章审核** | 写完一章停下等人审，通过后再写下章 | **交互默认** |
+| **串行** | 主 Agent 一口气写完全稿 | 用户明确说不用每章确认 |
+| **子Agent并行** | 多个子 Agent 分批并行写 | 追求速度且已授权全自动 |
+| **Agent Teams** | Claude Code 多 Agent 协作 | 大型长篇且已授权全自动 |
 
-### Phase 3：疯狂创作
+### Phase 3：创作
 
-确认后进入全自动创作模式，无需再次确认。你可以离开工作台，等待完成。
+- **逐章审核**：每章写完会把文件路径和字数交给你，你点头后才写下一章。
+- **全自动**：仅在你明确说「一口气写完」时启用。
 
 每章严格执行：写前分析 → 撰写(3000-5000字) → 润色去AI味 → 字数检查 → 更新摘要。
 
 ```
-✅ 第1章完成（3247字）
-✅ 第2章完成（3582字）
-✅ 第3章完成（3412字）
-...
+✅ 第1章完成（3247字）→ 等你审核
+（通过后才开始第2章）
 ```
 
 ### Phase 4：自动校验
@@ -201,13 +203,30 @@ chinese-novelist/
 
 ## 🛠️ 安装
 
-将此目录放入 Claude Code 的 skills 目录：
+### Cursor
+
+将本仓库复制或软链到 Cursor 的 skills 目录后重启 Agent：
+
+```bash
+# 用户级（推荐）
+ln -sfn /path/to/chinese-novelist-skill ~/.cursor/skills/chinese-novelist
+```
+
+不要把仓库根目录软链进 `.cursor/skills/`，会形成目录循环。
+
+### Claude Code
+
+安装 skill：`npx skills add PenglongHuang/chinese-novelist-skill`
+
+或将此目录放入 Claude Code 的 skills 目录：
 
 ```
 ~/.claude/skills/chinese-novelist/
 ```
 
-或通过 Claude Code 技能管理界面安装。
+输入指令：`使用 chinese-novelist 帮我写一部小说`
+
+默认会跟你确认题材、大纲，并且**写完一章等你审核**再继续。只有你明确说「跳过问答」「一口气写完」时才会少问。
 
 ---
 
@@ -221,7 +240,7 @@ chinese-novelist/
 | `phase1-layer1-core.md` | Phase 1 Layer 1：核心定位问答（Q1-Q3） |
 | `phase1-layer2-customize.md` | Phase 1 Layer 2：深度定制问答（Q4-Q8） |
 | `phase2-planning.md` | Phase 2：规划与写作计划生成 |
-| `phase3-writing.md` | Phase 3：疯狂创作（三种写作模式） |
+| `phase3-writing.md` | Phase 3：创作（逐章审核 / 串行 / 并行 / Teams） |
 | `phase4-validation.md` | Phase 4：自动校验与修复 |
 | `shared-infrastructure.md` | 共享机制（偏好系统、黄金法则、字数脚本） |
 

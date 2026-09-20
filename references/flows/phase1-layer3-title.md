@@ -35,7 +35,7 @@
 
 ## Step 3：展示与选择
 
-使用 `AskUserQuestion` 工具展示候选标题：
+使用当前环境的提问方式展示候选标题（见 [shared-infrastructure.md](shared-infrastructure.md)「交互运行时适配」）。若走「直接开写协议」，生成 3 个候选后选定最贴合的 1 个，展示后立即进入 Phase 2：
 
 ```
 Question: 基于您的故事元素，以下是为您生成的候选标题，请选择：

@@ -32,24 +32,36 @@ def count_chinese_words(text: str) -> int:
     return len(chinese_chars)
 
 
+def _section(content: str, heading: str) -> str:
+    """Extract a markdown ## section body by heading title."""
+    pattern = rf'^##\s*{re.escape(heading)}\s*$'
+    match = re.search(pattern, content, re.M)
+    if not match:
+        return ''
+    start = match.end()
+    next_heading = re.search(r'^##\s+', content[start:], re.M)
+    end = start + next_heading.start() if next_heading else len(content)
+    return content[start:end]
+
+
 def extract_content_from_chapter(file_path: Path) -> str:
-    """从章节文件中提取正文内容（排除标题等元数据）"""
+    """从章节文件中提取应计入字数的正文（章首引子 + 正文，排除概要和备注）"""
     with open(file_path, 'r', encoding='utf-8') as f:
         content = f.read()
 
-    # 查找正文开始位置（通常是第一个一级标题或二级标题之后）
-    lines = content.split('\n')
+    intro = _section(content, '章首引子')
+    body = _section(content, '正文')
+    if intro or body:
+        return '\n'.join(part for part in (intro, body) if part)
 
-    # 跳过开头的元数据（如 # 第XX章 标题）
+    # 旧格式或未分节：跳过第一个含「章」的标题行后的全部内容
+    lines = content.split('\n')
     content_start = 0
     for i, line in enumerate(lines):
         if line.startswith('#') and '章' in line:
             content_start = i + 1
             break
-
-    # 提取正文
-    main_content = '\n'.join(lines[content_start:])
-    return main_content
+    return '\n'.join(lines[content_start:])
 
 
 def check_chapter(file_path: str, min_words: int = 3000) -> dict:
@@ -140,7 +152,7 @@ def print_results(results: list, min_words: int = 3000):
         print('   - 增加对话场景')
         print('   - 扩展人物内心活动')
         print('   - 补充背景故事')
-        print(f'\n   参考: references/content-expansion.md')
+        print(f'\n   参考: references/guides/content-expansion.md')
 
 
 def main():
@@ -148,15 +160,19 @@ def main():
     min_words = 3000
 
     if len(sys.argv) < 2:
+        skill_root = Path(__file__).resolve().parent.parent
         print('用法:')
-        print('  检查单个章节: python check_chapter_wordcount.py <章节文件路径> [最小字数]')
-        print('  检查所有章节: python check_chapter_wordcount.py --all <目录路径> [最小字数]')
+        print('  检查单个章节: python3 check_chapter_wordcount.py <章节文件路径> [最小字数]')
+        print('  检查所有章节: python3 check_chapter_wordcount.py --all <目录路径> [最小字数]')
+        print('')
+        print(f'本脚本位于 skill 根目录: {skill_root}')
+        print('请用脚本真实路径调用；小说目录通常是工作区的 ./chinese-novelist/，两者不是同一处。')
         print('')
         print('示例:')
-        print('  python check_chapter_wordcount.py novels/故事/第01章.md')
-        print('  python check_chapter_wordcount.py novels/故事/第01章.md 3500')
-        print('  python check_chapter_wordcount.py --all novels/故事')
-        print('  python check_chapter_wordcount.py --all novels/故事 3500')
+        print(f'  python3 {skill_root}/scripts/check_chapter_wordcount.py ./chinese-novelist/项目/第01章-标题.md')
+        print(f'  python3 {skill_root}/scripts/check_chapter_wordcount.py ./chinese-novelist/项目/第01章-标题.md 3500')
+        print(f'  python3 {skill_root}/scripts/check_chapter_wordcount.py --all ./chinese-novelist/项目')
+        print(f'  python3 {skill_root}/scripts/check_chapter_wordcount.py --all ./chinese-novelist/项目 3500')
         return
 
     if sys.argv[1] == '--all':

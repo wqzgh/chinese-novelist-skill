@@ -23,7 +23,7 @@
      "createdAt": "[ISO时间]",
      "updatedAt": "[ISO时间]",
      "status": "planning",
-     "writingMode": "[serial|subagent-parallel|agent-teams]",
+     "writingMode": "[serial-review|serial|subagent-parallel|agent-teams]",
      "chapters": [
        {
          "chapterNumber": 1,
@@ -42,16 +42,17 @@
 
 **1. 展示规划摘要并请求确认**
 
-向用户展示规划摘要（小说名称、总章数、目标字数、主要人物、文风基准来源）并请求确认。
+向用户展示规划摘要（小说名称、总章数、目标字数、主要人物、文风基准来源）并**等待确认**。用户未回复「确认」前，禁止进入写作。只有优先级 3 的直接开写可以在无人回复时继续。
 
-**2. 写作模式选择**（用户确认规划后）
+**2. 写作模式选择**（规划确认后）
 
-使用 `AskUserQuestion` 询问：
+使用当前环境的提问方式询问（见 [shared-infrastructure.md](shared-infrastructure.md)「交互运行时适配」）。用户要求确认/审核时不要问，直接写入 `serial-review`：
 
 ```
 Question: 选择写作模式
 Options:
-- 逐章串行（主 Agent 自己逐章写，全程无中断，适合短中篇）
+- 逐章审核（写完一章停下来给你审，通过后再写下章）⭐ 交互默认
+- 逐章串行（一口气写完全稿，中途不再问你）
 - 子Agent并行（分批派生子 Agent 并行写作，大纲驱动连贯性，适合中长篇）
 - Agent Teams（Claude Code 多 Agent 协作模式，Agent 间可通讯，需手动开启）
 ```
@@ -59,4 +60,4 @@ Options:
 用户选择后：
 - 更新 `02-写作计划.json` 的 `writingMode` 字段
 - 更新 `status` 为 `"in_progress"`
-- 进入第三阶段：疯狂创作 → 详见 [phase3-writing.md](phase3-writing.md)
+- 进入第三阶段：创作 → 详见 [phase3-writing.md](phase3-writing.md)

@@ -6,7 +6,7 @@
 
 ## Q1：题材与创意概要
 
-使用 `AskUserQuestion` 工具询问：
+使用当前环境的提问方式询问（见 [shared-infrastructure.md](shared-infrastructure.md)「交互运行时适配」）：
 
 ```
 Question: 你想要创作什么题材的小说？
@@ -29,7 +29,7 @@ Options:
 
 ## Q2：主角与关系网络
 
-使用 `AskUserQuestion` 工具询问：
+使用当前环境的提问方式询问（见 [shared-infrastructure.md](shared-infrastructure.md)「交互运行时适配」）：
 
 ```
 Question: 主角是什么设定？
@@ -79,7 +79,7 @@ Options:
 
 ## Q3：核心冲突与驱动力
 
-使用 `AskUserQuestion` 工具询问：
+使用当前环境的提问方式询问（见 [shared-infrastructure.md](shared-infrastructure.md)「交互运行时适配」）：
 
 ```
 Question: 小说的核心冲突是什么？

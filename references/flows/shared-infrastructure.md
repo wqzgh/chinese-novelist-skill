@@ -88,11 +88,13 @@
 
 ### 作用
 
-- **进度跟踪**：记录每章创作状态（pending/in_progress/completed/failed）
-- **写作模式**：记录用户选择的写作模式（serial/subagent-parallel/agent-teams）
+- **进度跟踪**：记录每章创作状态（pending / in_progress / awaiting_review / completed / failed）
+- **写作模式**：记录用户选择的写作模式（serial-review / serial / subagent-parallel / agent-teams）
 - **中断续写**：Phase 0 读取 JSON 检测未完成项目，支持从断点继续
 - **校验依据**：Phase 4 基于 JSON 校验章节完成度和字数
 - **并行协调**（可选）：多 Agent 并行写作时通过 JSON 状态避免冲突
+
+`awaiting_review`：本章正文已写完、字数已检查，正在等人审核。`serial-review` 模式下，存在任一 `awaiting_review` 时禁止开始下一章。用户说「通过 / 下一章」后改为 `completed`。用户要求改稿则保持该章并重写，再回到 `awaiting_review`。
 
 ### 与大纲的关系
 
@@ -108,19 +110,49 @@
 
 ---
 
+## 交互运行时适配
+
+本 skill 最初按 Claude Code 的 `AskUserQuestion` 编写。Cursor、Cloud Agent 以及多数 IDE 没有该工具。按下面顺序选择交互方式，不要因为工具缺失而中断流程。
+
+| 优先级 | 条件 | 做法 |
+|--------|------|------|
+| 1 | 当前环境有结构化提问工具（如 `AskUserQuestion`） | 用它展示选项 |
+| 2 | 普通对话、可以等用户回复 | 用同样的选项列表在对话里提问，一次一题；**规划、标题、每一章都要等回复** |
+| 3 | **直接开写**：仅当当前环境确定收不到下一句用户回复（纯后台、无后续对话），且用户没有要求确认 | 执行下方「直接开写协议」 |
+
+禁止把「开始写一部小说」理解成可以跳过确认。用户还在对话中时，一律走优先级 2。
+
+用户如果说「都要跟我确认」「写完一章我审核后再继续」：写作模式锁定 `serial-review`，即使后台任务也要在每章结束后停下等下一句。
+
+### 直接开写协议
+
+仅适用于优先级 3。
+
+1. 用已有信息 + 智能随机补全 Q1–Q8（有 `user-preferences.json` 时优先从偏好里取）
+2. 按 Layer 3 规则生成 3 个候选标题，选定最贴合的 1 个
+3. 把完整创作配置与标题写入项目文件（仍应在能展示时展示）
+4. 写作模式默认 `serial-review`；只有用户明确说「一口气写完 / 不用每章确认」才用 `serial`
+5. 进入 Phase 2 创建项目文件。`serial-review` 下写完第 1 章必须停止。
+
+---
+
 ## 字数检查脚本
 
-使用 `scripts/check_chapter_wordcount.py` 检查章节字数：
+脚本在 **skill 根目录**（`SKILL.md` 所在目录）的 `scripts/check_chapter_wordcount.py`。小说写在用户工作区的 `./chinese-novelist/`，两者经常不是同一个目录。必须用脚本的真实路径，禁止假设当前工作目录就是 skill 根目录。
+
+定位 skill 根目录：本仓库 / 已安装目录（例如 `~/.cursor/skills/chinese-novelist/` 或 `~/.claude/skills/chinese-novelist/`）。
 
 ```bash
+SKILL_ROOT="<本 skill 的根目录>"
+
 # 检查单个章节
-python scripts/check_chapter_wordcount.py ./chinese-novelist/项目文件夹/第01章.md
+python3 "$SKILL_ROOT/scripts/check_chapter_wordcount.py" ./chinese-novelist/项目文件夹/第01章-标题.md
 
 # 检查所有章节
-python scripts/check_chapter_wordcount.py --all ./chinese-novelist/项目文件夹/
+python3 "$SKILL_ROOT/scripts/check_chapter_wordcount.py" --all ./chinese-novelist/项目文件夹/
 
 # 自定义最小字数
-python scripts/check_chapter_wordcount.py ./chinese-novelist/项目文件夹/第01章.md 3500
+python3 "$SKILL_ROOT/scripts/check_chapter_wordcount.py" ./chinese-novelist/项目文件夹/第01章-标题.md 3500
 ```
 
 ### 使用场景
@@ -131,3 +163,5 @@ python scripts/check_chapter_wordcount.py ./chinese-novelist/项目文件夹/第
 | Phase 4（自动校验） | 批量检查所有章节字数，不合格章节自动重写 |
 
 低于3000字的章节必须使用 [content-expansion.md](../guides/content-expansion.md) 的扩充技巧进行扩充。
+
+**统计范围**：只计 `## 章首引子` 与 `## 正文` 中的汉字。`本章概要`、`章节备注` 以及 Markdown 标题不计入。旧文件若没有这两个标题，则回退为「跳过第一个含章的标题行后的全部内容」。
